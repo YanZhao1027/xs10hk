@@ -25,6 +25,10 @@
 
 如果有 Atomos 外录样片，可以用 `bash tools/probe_recording.sh /path/to/clip.mov` 本地检查视频文件编解码元数据，但元数据不能独立证明 HDMI 输入位深。**当前不启动未验证的 X-S10 维修诊断模式；需要用户明确许可。**
 
+## USB 维修诊断研究（尚未进入）
+
+目前实机仍显示正常 PTP `04cb:02ea`，**尚未检测到 `04cb:ff80`、没有发送维修指令或读取 RAM**。已加入只接受 FF80 的受限探测脚本 `tools/ff80_info_only.py`，默认仅检查 USB ID；`--read-info` 才尝试型号和版本信息读取，不包含任意 RAM 写/读或校准访问。适配 X-S10 尚未验证。参见 [第六阶段风险与进度](docs/phase6-ff80-constrained-probe-2026-10-14.md)。
+
 ## USB 实机固件版本确认（安全只读）
 
 ~~~bash
