@@ -31,5 +31,3 @@ public class ARMProbe extends GhidraScript {
         println("XS10_PROBE function=" + (func == null ? "none" : func.getName()));
     }
 }
-
-[executed on device: zyubuntu-MS-7E51 (3921990e-de77-4a74-b704-a9c1e6b55713)]
