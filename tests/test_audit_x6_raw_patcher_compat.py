@@ -27,6 +27,7 @@ class X6PatcherCompatibilityTests(unittest.TestCase):
         self.assertEqual(detect.call_args.args[0][:4],b"ABCD")
         self.assertEqual(result["os_id"],6)
         self.assertEqual(result["version"],(3,11))
+        self.assertEqual(result["version_display"],"3.0b")
         self.assertFalse(result["known_raw_patcher_safe"])
         self.assertIn("UNKNOWN",result["status"])
         self.assertEqual(dat,fake_dat())
