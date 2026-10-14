@@ -12,7 +12,10 @@
 - 用户已从官方页面下载 `FWUP0025.DAT` 至 `/home/zyubuntu/Downloads/`；文件头读取出 Ver.3.11，SHA-256 记录如下，但**尚未验证厂家签名或校验和**。
 - 已在 `output/xs10-payload.bin` 离线提取约 48.7 MiB 负载；标记扫描结果仅保留在 `output/video-markers.json`。
 - 目前发现 HEVC/H.265 编码器相关诊断文本与 `4K_59_94P_400M_16` 模式名，**不能据此推断机身具备可用的编码或 4K60 功能**。
-- 已记录 [第一阶段研究笔记](docs/findings-2026-10-14.md)。
+- 已记录 [第一阶段研究笔记](docs/findings-2026-10-14.md)、[第二阶段 Ghidra / 编码模块分析](docs/phase2-2026-10-14.md)。
+- Ghidra 12.1.4 + JDK 25 已验证并安装在 `/home/zyubuntu/tools/`；本地项目放在被忽略的 `output/ghidra/`。
+- 同一套签名发现 H.265 Encoder、H.264 Encoder、H.264 Decoder 三组描述符，但是否执行仍未证实。
+- 注意：直接扁平导入负载会把非代码误解为代码，尚需还原分段及运行时内存映射。
 - 仓库中的工具只用于电脑端检查和**离线、只读**文件分析。
 
 ## 从 USB 检查开始
@@ -51,6 +54,12 @@ python3 tools/video_markers.py output/xs10-payload.bin --json output/video-marke
 ~~~
 
 此命令已运行过一次；再次输出 JSON 时请选择新路径，因为工具不会覆盖已有结果。字符串命中并不是功能可用的证据。
+
+## 识别视频编解码模块描述符
+
+~~~bash
+python3 tools/module_inventory.py output/xs10-payload.bin
+~~~
 
 ## 运行离线单元测试
 
