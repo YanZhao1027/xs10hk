@@ -9,7 +9,7 @@ from packed_headers import scan_headers
 
 class PackedHeaderTests(unittest.TestCase):
     def test_detect_valid_header(self):
-        image = bytearray(0x80000)
+        image = bytearray(0x200000)
         struct.pack_into("<IIIII", image, 0x20060, 0x200000, 0x100000,
                          0xEF, 0x4000, 4)
         rows = scan_headers(image)
