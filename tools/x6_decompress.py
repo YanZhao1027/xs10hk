@@ -87,6 +87,10 @@ def decode_stream(packed: bytes, expected_size: int,
         ptr += 1
         n = second & 0x0F
         distance = ((first & 0x7F) << 4) | (second >> 4)
+        # Neither zero-length nor zero-distance references occur in the
+        # 8 original X-S10/X-T4 streams: don't silently guess semantics.
+        if n == 0:
+            raise X6FormatError("Unrecognized zero-length LZ reference")
         if len(out) + n > expected_size:
             raise X6FormatError("LZ reference exceeds declared output length")
         if n:
