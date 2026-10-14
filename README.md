@@ -7,7 +7,7 @@
 ## 当前状态（2026-10-14）
 
 - 研究主机：Ubuntu 24.04.5 LTS (x86_64)。
-- USB 已连接并识别：Fujifilm USB PTP Camera，VID:PID `04cb:02ea`。
+- 此前曾通过正常 USB 识别到 Fujifilm USB PTP Camera，VID:PID `04cb:02ea`；最近一次 `lsusb` 未检测到相机（用户尚未重新连接）。
 - 机身当前固件版本：**尚未确认**。
 - 用户已从官方页面下载 `FWUP0025.DAT` 至 `/home/zyubuntu/Downloads/`；文件头读取出 Ver.3.11，SHA-256 记录如下，但**尚未验证厂家签名或校验和**。
 - 已在 `output/xs10-payload.bin` 离线提取约 48.7 MiB 负载；标记扫描结果仅保留在 `output/video-markers.json`。
@@ -18,6 +18,12 @@
 - 通过比对大小字段与公开压缩率记录，已经在 X-S10 3.11 与 X-T4 2.12 两套 X6 固件中各找到 **4 组压缩段头候选记录**；尚未解压主程序，也尚未恢复真实运行时地址。
 - 注意：直接扁平导入负载会把非代码误解为代码，尚需还原分段及运行时内存映射。
 - 仓库中的工具只用于电脑端检查和**离线、只读**文件分析。
+
+## 当前重点：HDMI 10-bit 与机内 Main10 并非同一路径
+
+官方 X-S10 说明书确认 HDMI 4:2:2 10-bit、SD 4:2:0 8-bit；X-T4 说明书则确认 SD 上的 H.265 4:2:0 10-bit。共享 HEVC 固件块不能证明 X-S10 已经具备机内 HEVC Main10 初始化能力。参见 [下一阶段研究路线与可选诊断模式的风险说明](docs/next-step-hdmi-and-diagnostic-2026-10-14.md)。
+
+如果有 Atomos 外录样片，可以用 `bash tools/probe_recording.sh /path/to/clip.mov` 本地检查视频文件编解码元数据，但元数据不能独立证明 HDMI 输入位深。**当前不启动未验证的 X-S10 维修诊断模式；需要用户明确许可。**
 
 ## 从 USB 检查开始
 
