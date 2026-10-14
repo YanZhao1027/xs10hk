@@ -13,7 +13,8 @@ MARKERS = [
     "HEVCENC", "H.265 MP Encoder", "Encoder=HEVC",
     "set-opt encode stream bitdepth: unsupported value",
     "Firmware version does not match hardware!",
-    "H264", "H265", "H.264", "H.265",
+    "H264", "H265", "H.264", "H.265", "H.265(HEVC)",
+    "4:2:0 10bit", "4:2:2 10bit",
     "4K_59_94P_400M_16", "4K_59_94P", "_4K30FP",
     "FHD60FPS", "MOVIECROP_X110", "59.94P",
     "MOVIE MODE BIT RATE", "MOVIE MODE FRAME RATE",
@@ -38,11 +39,14 @@ def scan(data, markers=MARKERS):
     results = []
     for marker in markers:
         for codec in ("ascii", "utf-16-le"):
-            matches = offsets(data, marker.encode(codec))
-            if matches:
+            needle = marker.encode(codec)
+            matches = offsets(data, needle)
+            total = data.count(needle)
+            if total:
                 results.append({"marker": marker, "encoding": codec,
+                                "total_count": total,
                                 "offsets": [hex(n) for n in matches],
-                                "truncated_at": 32 if len(matches) == 32 else None})
+                                "truncated_at": 32 if total > 32 else None})
     return results
 
 
@@ -53,7 +57,8 @@ def main():
     args = parser.parse_args()
     results = scan(args.payload.read_bytes())
     for item in results:
-        print(f"{item['marker']!r} [{item['encoding']}] at {', '.join(item['offsets'])}")
+        print(f"{item['marker']!r} [{item['encoding']}] count={item['total_count']} "
+              f"at {', '.join(item['offsets'])}")
     print(f"{len(results)} marker/encoding matches; no functionality implied")
     if args.json:
         args.json.parent.mkdir(parents=True, exist_ok=True)
