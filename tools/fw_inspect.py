@@ -28,8 +28,8 @@ def inspect(data):
     if header_size >= len(data):
         raise ValueError("Header extends past payload")
     model_code = bytes(code[i] for i in range(1, len(code), 2))
-    model_code = model_code.split(b"\x00", 1)[0].decode("ascii", errors="replace")
-    return {"os_id": os_id, "model_code": model_code,
+    model_code = model_code[:8].decode("ascii", errors="replace")
+    return {"os_id": os_id, "model_code_prefix": model_code,
             "version_components": (version1, version2),
             "checksum_field": checksum, "end_field": end,
             "header_bytes": header_size, "payload_bytes": len(data) - header_size,
@@ -48,7 +48,8 @@ def main():
         p.error(str(exc))
     for key, value in info.items():
         print(f"{key}: {value}")
-    print("NOTICE: A parsed header does not establish model compatibility or a valid signature.")
+    print("NOTICE: Header trailing fields and vendor checksum are not authenticated.\n"
+          "A parsed header does not establish model compatibility or a valid signature.")
     if args.extract:
         if args.extract.exists():
             p.error("Output already exists; refusing to overwrite")
