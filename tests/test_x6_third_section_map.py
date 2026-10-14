@@ -33,7 +33,7 @@ class AdditionalX6ARMTests(unittest.TestCase):
         data[0] = 0
         # base=old+0x120 -> now out of RAM region but still plausibly aligned
         # so specifically corrupt prologue to assert strict validation.
-        data[8] = 0
+        data[11] = 0
         with self.assertRaisesRegex(ValueError, "entry metadata"):
             analyze(bytes(data))
 
