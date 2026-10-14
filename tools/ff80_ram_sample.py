@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Controlled X-S10 FF80 one-time RAM sample (experimental).
+"""DISABLED: historical X-S10 FF80 RAM test that caused a service-mode hang.
 
 User-authorized scope:
 1. Read RAM cfgdata offset 0xF7; require it equals 0.
@@ -11,7 +11,9 @@ The ff80 author documents cfgdata writes as volatile until a separate EEPROM
 save command. This tool never sends EEPROM save, arbitrary addresses, firmware
 commands, or memory writes. 0x00000000 is described as a common RAM-dump
 starting address by the author but is NOT independently verified on X-S10.
-This experiment can cause a crash. Do not change the constants and rerun blindly.
+LIVE TEST RESULT: The 16-byte RAM request timed out and the camera stopped
+responding to FF80; restoring debug config was not confirmed. This tool
+is intentionally DISABLED at CLI entry. Never rerun it on X-S10.
 """
 import hashlib
 import struct
@@ -146,6 +148,11 @@ def controlled_trial(link, logger=print):
 
 
 def main():
+    sys.exit(
+        "DISABLED: X-S10 FF80 RAM test produced USB timeouts and failed "
+        "debug-flag restore verification. Do NOT rerun on a live camera. "
+        "Use only for offline code review of the failed experiment."
+    )
     if LOCAL_OUTPUT.exists():
         sys.exit("Local sample path already exists; refusing to overwrite")
     d = usb.core.find(idVendor=VENDOR, idProduct=SERVICE_PID)
