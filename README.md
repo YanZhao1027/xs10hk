@@ -29,13 +29,22 @@ python3 tools/codec_setting_permissions.py \
   --xs10-section1 output/x6-xs10/section-1.bin
 ~~~
 
+
+**进一步交叉验证：** 与 codec 配置相邻的另外四组录像相关设置也有一对一 ID 映射（X-T4 `0x3DD/0x3DF/0x3E2/0x3E4/0x3E5` 对应 X-S10 `0x3F4/0x3F6/0x3F9/0x3FB/0x3FC`）。两机录像类别的 **33 条有序 (设置数值, 权限 flag) 全部相同**；即使某些原厂表存在重复数字，新工具也能保留重复条目准确比较。其它三个设置项的精确语义还未确定，因此仍未证明 4K60 完全开放。
+
+~~~bash
+python3 tools/compare_movie_perm_groups.py \
+  --xt4-section1 output/x6-xt4/section-1.bin \
+  --xs10-section1 output/x6-xs10/section-1.bin
+~~~
+
 ## 第十六阶段：恢复尚未分析的第 3 个 ARM 程序段（2026-10-15）
 
 已验证 X-T4、X-S10 的 X6 LZ77 `section-3.bin` 均为 **包含真实 ARM 程序和混合数据**的二进制。通过文件首个函数指针、两个 ARM 函数序言、内部 BL 分支目标独立验证段地址，并将其加载进既有 Ghidra 联合项目，**两机均分析成功并已保存**。其中尚有区域落到非代码数据，完整运行时 overlay/重定位仍待确定，不能将任何地址范围内字节盲目改写。
 
 **[第十六阶段：第三 ARM 段地址推导与 Ghidra 验证](docs/phase16-third-arm-section-2026-10-15.md)**。离线工具：`tools/x6_third_section_map.py`。
 
-三阶段新增的 8＋5＋8 项测试，与原有 91 项合计 **112 项全部通过**。所有程序源码已提交 GitHub；Ubuntu 目前遇到 GitHub TLS 握手失败，本轮在本地 Git 忽略的 `output/` 目录采用 GitHub 同字节源码备份运行测试。**实机 USB 诊断仍暂停；无相机操作，也无修改固件。**
+三阶段新增的 8＋5＋8＋4 项测试，与原有 91 项合计 **116 项全部通过**（含最新 4 项五组权限表对比测试）。所有程序源码已提交 GitHub；Ubuntu 目前遇到 GitHub TLS 握手失败，本轮在本地 Git 忽略的 `output/` 目录采用 GitHub 同字节源码备份运行测试。**实机 USB 诊断仍暂停；无相机操作，也无修改固件。**
 
 ## 第十五阶段：4K60 真正录像参数表恢复（2026-10-14）
 
