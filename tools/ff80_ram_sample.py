@@ -78,6 +78,10 @@ class RestrictedFF80:
             raise RuntimeError("Wrong FF80 response envelope")
         if err1:
             raise FirmwareRejected(f"FF80 operation denied {err1:#x}/{err2:#x}")
+        if op == READ_CONFIG_OP and fn == SUB_WRITE_CFG and len(reply) == 20:
+            # ffjlib.write_config_data explicitly allows an empty payload:
+            # a successful status header does not always echo 16-byte params.
+            return b""
         if len(reply) != 36 + reply_data_size:
             raise RuntimeError(f"Wrong FF80 response size {len(reply)}")
         if reply[20:36] != params:
