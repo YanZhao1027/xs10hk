@@ -8,7 +8,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "tools"))
 from ptp_device_info import parse, PTPReader
 
 def txt(value):
-    return bytes([len(value) + 1]) + (value + "\\x00").encode("utf-16-le")
+    return bytes([len(value) + 1]) + (value + chr(0)).encode("utf-16-le")
 
 def array_of_words(items):
     return struct.pack("<I", len(items)) + b"".join(struct.pack("<H", i) for i in items)
