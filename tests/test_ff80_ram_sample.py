@@ -4,7 +4,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "tools"))
-from ff80_ram_sample import controlled_trial, RestrictedFF80, MEM_SIZE
+from ff80_ram_sample import controlled_trial, RestrictedFF80, MEM_SIZE, main
 
 
 class FakeLink:
@@ -37,6 +37,13 @@ class FakeLink:
 
 
 class ControlledRAMTests(unittest.TestCase):
+    def test_live_entry_is_disabled(self):
+        from unittest.mock import patch
+        # Guard must terminate before USB device discovery or access.
+        with patch("ff80_ram_sample.usb.core.find", side_effect=AssertionError("No USB allowed")):
+            with self.assertRaisesRegex(SystemExit, "DISABLED"):
+                main()
+
     def test_success_restores(self):
         d = FakeLink()
         self.assertEqual(controlled_trial(d, logger=lambda _: None), bytes(range(16)))
