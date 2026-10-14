@@ -1,0 +1,19 @@
+# Never publish firmware or user media
+firmware/
+output/
+*.DAT
+*.dat
+*.bin
+*.rom
+*.img
+*.ghidra
+*.gpr
+*.rep
+*.gzf
+*.pyc
+__pycache__/
+*.log
+captures/
+*.pcap
+*.pcapng
+.env
