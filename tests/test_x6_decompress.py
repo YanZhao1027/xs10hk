@@ -62,9 +62,10 @@ class X6CodecTests(unittest.TestCase):
         self.assertEqual(output[-15:], bytes(range(15)))
         self.assertEqual(stats.maximum_distance, 2047)
 
-    def test_zero_length_backreference_is_noop(self):
-        output, _ = decode_stream(b"\x00\x80\x00\x01Z", 1)
-        self.assertEqual(output, b"Z")
+    def test_zero_length_backreference_rejected(self):
+        # Unobserved in real X6 images, so fail closed.
+        with self.assertRaisesRegex(X6FormatError, "zero-length"):
+            decode_stream(b"\x00\x80\x00\x01Z", 1)
 
     def test_truncated_literal(self):
         with self.assertRaisesRegex(X6FormatError, "Truncated literal"):
