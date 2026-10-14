@@ -7,9 +7,12 @@
 ## 当前状态（2026-10-14）
 
 - 研究主机：Ubuntu 24.04.5 LTS (x86_64)。
-- USB 初次检查：未发现 Fujifilm USB 设备；需要确认相机已开机、USB 连接模式和数据线。
+- USB 已连接并识别：Fujifilm USB PTP Camera，VID:PID `04cb:02ea`。
 - 机身当前固件版本：**尚未确认**。
-- 原厂固件：**尚未取得或验证**。
+- 用户已从官方页面下载 `FWUP0025.DAT` 至 `/home/zyubuntu/Downloads/`；文件头读取出 Ver.3.11，SHA-256 记录如下，但**尚未验证厂家签名或校验和**。
+- 已在 `output/xs10-payload.bin` 离线提取约 48.7 MiB 负载；标记扫描结果仅保留在 `output/video-markers.json`。
+- 目前发现 HEVC/H.265 编码器相关诊断文本与 `4K_59_94P_400M_16` 模式名，**不能据此推断机身具备可用的编码或 4K60 功能**。
+- 已记录 [第一阶段研究笔记](docs/findings-2026-10-14.md)。
 - 仓库中的工具只用于电脑端检查和**离线、只读**文件分析。
 
 ## 从 USB 检查开始
@@ -26,22 +29,28 @@ bash scripts/check_usb.sh
 
 官方入口：https://www.fujifilm-x.com/global/support/download/firmware/cameras/x-s10/
 
-官方公布的 Ver.3.11（2024-03-28）文件名为 **FWUP0025.DAT**。下载完成后，在项目里自行建立本地私有目录并移动固件文件：
+官方公布的 Ver.3.11（2024-03-28）文件名为 **FWUP0025.DAT**。固件已下载到本机 Downloads，直接运行以下只读命令：
 
 ~~~bash
-mkdir -p firmware output
-# 将您自行下载的 FWUP0025.DAT 放到 firmware/ 内（不要上传仓库）
-sha256sum firmware/FWUP0025.DAT
-python3 tools/fw_inspect.py firmware/FWUP0025.DAT
+sha256sum /home/zyubuntu/Downloads/FWUP0025.DAT
+python3 tools/fw_inspect.py /home/zyubuntu/Downloads/FWUP0025.DAT
 ~~~
 
 若只读解析结果符合预期，且决定将原厂负载导出供后续静态分析，可执行：
 
 ~~~bash
-python3 tools/fw_inspect.py firmware/FWUP0025.DAT --extract output/xs10-payload.bin
+python3 tools/fw_inspect.py /home/zyubuntu/Downloads/FWUP0025.DAT --extract output/xs10-payload.bin
 ~~~
 
-分析脚本只读取 DAT 和写入指定的电脑本地输出文件；不会访问 USB 相机、不会生成可用于刷机的修改固件、也不校验厂家签名。**解析成功不代表固件安全或机型已被破解**。
+首次提取已完成；重复执行会因目标文件已存在而停止，以免覆盖。分析脚本只读取 DAT 和写入指定的电脑本地输出文件；不会访问 USB 相机、不会生成可用于刷机的修改固件、也不校验厂家签名。**解析成功不代表固件安全或机型已被破解**。
+
+## 扫描视频功能标记
+
+~~~bash
+python3 tools/video_markers.py output/xs10-payload.bin --json output/video-markers.json
+~~~
+
+此命令已运行过一次；再次输出 JSON 时请选择新路径，因为工具不会覆盖已有结果。字符串命中并不是功能可用的证据。
 
 ## 运行离线单元测试
 
