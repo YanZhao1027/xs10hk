@@ -26,14 +26,22 @@ def find_matches(left, right, blocksize=4096, min_length=65536):
         data = right[b:b + blocksize]
         if interesting(data):
             index[hashlib.sha256(data).digest()].append(b)
-    pairs = set()
+    left_index = defaultdict(list)
     for a in range(0, len(left) - blocksize + 1, blocksize):
         data = left[a:a + blocksize]
-        if not interesting(data):
+        if interesting(data):
+            left_index[hashlib.sha256(data).digest()].append(a)
+
+    pairs = set()
+    for digest, a_positions in left_index.items():
+        b_positions = index.get(digest, [])
+        # Unique anchors prevent repeated UI resources or microcode padding from
+        # generating dozens of deceptive alternative alignments.
+        if len(a_positions) != 1 or len(b_positions) != 1:
             continue
-        for b in index.get(hashlib.sha256(data).digest(), []):
-            if data == right[b:b + blocksize]:
-                pairs.add((a, b))
+        a, b = a_positions[0], b_positions[0]
+        if left[a:a + blocksize] == right[b:b + blocksize]:
+            pairs.add((a, b))
     runs = []
     for a, b in sorted(pairs):
         if (a - blocksize, b - blocksize) in pairs:
