@@ -28,5 +28,3 @@ public class XS10Seed extends GhidraScript {
         }
     }
 }
-
-[executed on device: zyubuntu-MS-7E51 (3921990e-de77-4a74-b704-a9c1e6b55713)]
