@@ -1,0 +1,67 @@
+# X-S10 Firmware Research / X-S10 固件研究
+
+研究目标：评估富士 X-S10 的 **4K30 10-bit 机内录制** 和 **4K60** 是否受固件限制，区分视频菜单限制、硬件编码能力、传感器读取模式、HDMI 处理链与散热限制。
+
+> 项目当前为 **只读研究阶段**。不刷写、不修改 SD 卡内容、不运行未经验证的相机端代码。尚无证据证明 X-S10 可以解锁 4K60 或 10-bit 内录。
+
+## 当前状态（2026-10-14）
+
+- 研究主机：Ubuntu 24.04.5 LTS (x86_64)。
+- USB 初次检查：未发现 Fujifilm USB 设备；需要确认相机已开机、USB 连接模式和数据线。
+- 机身当前固件版本：**尚未确认**。
+- 原厂固件：**尚未取得或验证**。
+- 仓库中的工具只用于电脑端检查和**离线、只读**文件分析。
+
+## 从 USB 检查开始
+
+在 Ubuntu 终端运行：
+
+~~~bash
+bash scripts/check_usb.sh
+~~~
+
+如未发现设备，使用支持数据的 USB-C 线，将相机设置为「USB 读卡器」，连接电脑后 **开机**，然后重跑脚本。无需安装驱动、无需 sudo。该脚本只读取 USB 枚举信息，不向相机写入数据。USB 读卡器模式不是读取相机固件的调试接口。
+
+## 下载并检查原厂固件（需自行阅读并接受官方许可）
+
+官方入口：https://www.fujifilm-x.com/global/support/download/firmware/cameras/x-s10/
+
+官方公布的 Ver.3.11（2024-03-28）文件名为 **FWUP0025.DAT**。下载完成后，在项目里自行建立本地私有目录并移动固件文件：
+
+~~~bash
+mkdir -p firmware output
+# 将您自行下载的 FWUP0025.DAT 放到 firmware/ 内（不要上传仓库）
+sha256sum firmware/FWUP0025.DAT
+python3 tools/fw_inspect.py firmware/FWUP0025.DAT
+~~~
+
+若只读解析结果符合预期，且决定将原厂负载导出供后续静态分析，可执行：
+
+~~~bash
+python3 tools/fw_inspect.py firmware/FWUP0025.DAT --extract output/xs10-payload.bin
+~~~
+
+分析脚本只读取 DAT 和写入指定的电脑本地输出文件；不会访问 USB 相机、不会生成可用于刷机的修改固件、也不校验厂家签名。**解析成功不代表固件安全或机型已被破解**。
+
+## 运行离线单元测试
+
+~~~bash
+python3 -m unittest discover -s tests -v
+~~~
+
+测试使用自造的合成字节数据；不包含富士原厂固件。
+
+## 研究路线
+
+1. USB 枚举与版本信息确认（不进行写入）。
+2. 离线检查 X-S10 官方 DAT 包头及负载格式，记录 SHA-256。
+3. 在合法且获得许可的前提下对比 X-S10 与 X-T4 的固件组件、视频模式表及编码器初始化。
+4. 静态分析结果要与实际硬件能力分开记录；不能仅凭相同的 X-Processor 4 推断功能可解锁。
+5. 在有可靠恢复手段、充分测试之前，不尝试补丁刷写。
+
+## 安全与版权
+
+- **禁止向本公开仓库提交** 原厂 \`.DAT\`、解包的 \`.bin\`、内存镜像、存储卡照片、含序列号的日志或其它可能属于第三方的受版权保护文件。
+- 富士官方固件下载协议包含逆向工程限制，请自行查阅和考虑适用法律及使用许可。
+- FujiHack 列出的「使用同类 RTOS 的机型」**不等于**针对该机型已有成熟补丁。
+- 已有资料：[官方固件页面](https://www.fujifilm-x.com/global/support/download/firmware/cameras/x-s10/)、[FujiHack 固件格式](https://wiki.fujihack.org/firmware/)、[FujiHack 项目](https://github.com/fujihack/fujihack)、[FujiHack Patcher](https://github.com/fujihack/patcher)。
