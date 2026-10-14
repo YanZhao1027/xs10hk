@@ -85,11 +85,11 @@ class RecorderLUTTests(unittest.TestCase):
 
     def test_missing_sentinel_rejected(self):
         _, s2 = make_samples()
-        d = bytearray(s2)
-        d[0x40 + 4*ROW_BYTES] = 1
-        # No sentinel exists within the 64-byte row range.
+        # Truncate just before sentinel: any complete 64-byte table row
+        # must now be out of bounds before the sentinel could be read.
+        before_sentinel = s2[:0x40 + 4*ROW_BYTES]
         with self.assertRaisesRegex(ValueError, "sentinel"):
-            parse_rows(bytes(d), TEST_LAYOUT)
+            parse_rows(before_sentinel, TEST_LAYOUT)
 
     def test_out_of_range_rejected(self):
         with self.assertRaisesRegex(ValueError, "Out-of-range"):
