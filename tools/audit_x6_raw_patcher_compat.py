@@ -23,10 +23,13 @@ def analyze_package(data: bytes):
     info = inspect(data)
     payload = bytes(b ^ 0xFF for b in data[info["header_bytes"]:])
     sections = find_sections(payload)
+    human_version = (f"{info['version_components'][0]:x}."
+                     f"{info['version_components'][1]:02x}")
     if not sections:
         return {
             "os_id": info["os_id"],
             "version": info["version_components"],
+        "version_display": human_version,
             "header_bytes": info["header_bytes"],
             "x6_lz77_packed_sections": 0,
             "known_raw_patcher_safe": False,
@@ -35,6 +38,7 @@ def analyze_package(data: bytes):
     return {
         "os_id": info["os_id"],
         "version": info["version_components"],
+        "version_display": human_version,
         "header_bytes": info["header_bytes"],
         "x6_lz77_packed_sections": len(sections),
         "section_layout": [
