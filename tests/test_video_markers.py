@@ -15,6 +15,12 @@ class VideoMarkersTests(unittest.TestCase):
         self.assertEqual(report[1]["encoding"], "utf-16-le")
         self.assertEqual(report[1]["offsets"], [hex(13)])
 
+    def test_total_count_exceeds_offset_limit(self):
+        records = scan(b"x" * 40, ["x"])
+        self.assertEqual(records[0]["total_count"], 40)
+        self.assertEqual(len(records[0]["offsets"]), 32)
+        self.assertEqual(records[0]["truncated_at"], 32)
+
     def test_limit(self):
         self.assertEqual(offsets(b"xxxx", b"x", limit=2), [0, 1])
 
