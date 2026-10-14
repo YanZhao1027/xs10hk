@@ -13,10 +13,11 @@ class AlignmentTests(unittest.TestCase):
         self.assertTrue(interesting(bytes(range(256)) * 16))
 
     def test_shifted_match(self):
-        block = bytes(range(256))
+        block = bytes(range(256)) * 16
+        shared = b"".join(bytes((i + n) % 256 for i in block) for n in range(4))
         head = b"w" * 4096
-        left = head + block * 16 * 4 + bytes([1]) * 4096
-        right = bytes([2]) * 4096 * 3 + block * 16 * 4
+        left = head + shared + bytes([1]) * 4096
+        right = bytes([2]) * 4096 * 3 + shared
         runs = find_matches(left, right, 4096, 16384)
         self.assertTrue(any(r["delta"] == 8192 and r["length"] >= 16384 for r in runs))
 
