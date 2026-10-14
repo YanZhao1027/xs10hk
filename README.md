@@ -25,9 +25,17 @@
 
 如果有 Atomos 外录样片，可以用 `bash tools/probe_recording.sh /path/to/clip.mov` 本地检查视频文件编解码元数据，但元数据不能独立证明 HDMI 输入位深。**当前不启动未验证的 X-S10 维修诊断模式；需要用户明确许可。**
 
-## USB 维修诊断研究（尚未进入）
+## USB 维修诊断研究（已进入，受限只读查询成功）
 
-目前实机仍显示正常 PTP `04cb:02ea`，**尚未检测到 `04cb:ff80`、没有发送维修指令或读取 RAM**。已加入只接受 FF80 的受限探测脚本 `tools/ff80_info_only.py`，默认仅检查 USB ID；`--read-info` 才尝试型号和版本信息读取，不包含任意 RAM 写/读或校准访问。适配 X-S10 尚未验证。参见 [第六阶段风险与进度](docs/phase6-ff80-constrained-probe-2026-10-14.md)。
+已在 X-S10 实机上成功进入并退出 `04cb:ff80` 维修模式（红灯、黑屏），验证普通开机能恢复；**受限 FF80 信息查询成功**：`product_name=X-S10`、`device_version=1.60`（含义待确认）、`device_type=CAMERA`、`framework=1.00`。普通 PTP 曾报告 `2.10`，两个字段不可混为一谈。只读查询固定配置字节 `0xF7` 得到 **`0x00`（USB 调试关闭）**，因此未执行 RAM dump，也没有修改 RAM、永久配置或固件。参见 [第七阶段实机 FF80 报告](docs/phase7-ff80-live-2026-10-14.md)，以及 [第六阶段入口测试](docs/phase6-ff80-constrained-probe-2026-10-14.md)。
+
+## FF80 单字节调试开关状态检查（仅在 FF80 且有临时 USB 权限时）
+
+~~~bash
+python3 tools/ff80_debug_flag.py
+~~~
+
+此脚本**只读取**地址 `0xF7` 的 1 个配置字节，不会开启调试，也不读取 RAM/刷机。它不负责设备权限授权。详见 [阶段七报告](docs/phase7-ff80-live-2026-10-14.md)。
 
 ## USB 实机固件版本确认（安全只读）
 
