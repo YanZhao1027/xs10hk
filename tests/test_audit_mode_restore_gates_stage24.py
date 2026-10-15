@@ -10,6 +10,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from audit_mode_restore_gates_stage24 import (
     SPECS, A32_RESTORE_FINGERPRINT, audit, decode_arm_branch,
     decode_cond_ldrb, find_signature, read_word, get_decomp,
