@@ -7,6 +7,19 @@
 
 
 
+
+## 第 22 阶段：外录机 HDMI 10bit 与机内 4K60 的关键误区已彻底厘清（2026-10-15）
+
+**用户假说**：X-S10 连接外置录机时启用10bit输出，4K60单独通过其它条件解锁。**新结论**：X-S10 官方确实支持 HDMI **4:2:2 10bit** 输出，但原机 SD 内录只有 **H.264 4:2:0 8-bit**。我们此次发现**HDMI 信息设置变量、菜单 codec 设置变量、实际 Recorder codec 变量各不相同**，外录10bit不能当成SD内录Main10。
+
+更重要的是，我们从真正的 X-S10 `FUN_02050094`、X-T4 `FUN_01FAC60C` 的 4K fps=6 条件一路逆向，恢复了完整的 **HDMI DDC／EDID 接收设备模式协商**：其上游 `FUN_0126B7E0` ／ `FUN_012419F8` 读取 `0xFFF7B000` 接口、`0x80`B EDID基本块及 **EDID+`0x7E` 扩展块数量**；HDMI sink报告的 4K60 枚举模式经转换为 `0xF0／0xF6`，按当前外录机 EDID 决定输出兼容性。**不能将其误认为 X-S10 sensor/ISP 4K60 白名单或可修改的机内60p锁。**
+
+额外逐字节核验两机 HDMI 代码表 **36条×16B＝576B 完全相同**（SHA256 `9cb1963b5623ea2f869bbd4fe6c016d8c2e5055434966416ef092dc0532fb3d3`）。与此前两机相同的 96×64B **Recorder LUT 是两套不同的表**：EDID mode 代表外部接收设备能力；Recorder LUT只是码流参数候选。两者都不能单独证明 X-S10 具备传感器 4K60时钟与读出能力。
+
+已新增 [`tools/audit_hdmi_edid_vs_recorder_4k60.py`](tools/audit_hdmi_edid_vs_recorder_4k60.py) 和14项离线合成测试，**累计177项全通过**。下一关聚焦**真正的 sensor/ISP 4K59.94读取控制和 Recorder上游分辨率×帧率合法组合检查**，另行追 `eModeMovieCodec` 菜单到 Recorder 快照的Main10桥接。相机FW2.10不对应研究FW3.11地址；无相机通讯、FF80或刷机。
+
+**[第22阶段完整报告：HDMI EDID外录4K60与内录硬件能力的严格区别](docs/phase22-hdmi-edid-vs-internal-4k60-2026-10-15.md)**。
+
 ## 第 21 阶段：H.265 菜单数字映射竟然 49/49 相同；差异指向 UI 资源（2026-10-15）
 
 **新完成的原厂 ARM 指令与表数据双重校验：**X-S10 `0x02103A30` 通过数值转换器读取电影编码设置 `0x3FC`，再于 `0x02103A38` 直接调用 `FUN_0115B578` 更新 `eModeMovieCodec`；X-T4 的对应调用地址为 `0x02057E74`／`0x02057E7C`、设置项 `0x3E5`。全部真实 A32 BL 及 MOV 立即数由脚本独立计算验证。
